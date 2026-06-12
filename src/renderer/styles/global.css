@@ -1,0 +1,54 @@
+:root {
+  --accent: #00d4ff;
+  --bg-glass: rgba(20, 20, 20, 0.75);
+  --bg-card: rgba(255, 255, 255, 0.06);
+  --text: #e8e8e8;
+  --text-dim: #9aa0a6;
+  --ok: #34d399;
+  --warn: #fbbf24;
+  --err: #f87171;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color: var(--text);
+  background: transparent;
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  user-select: none;
+}
+
+/* Linux fallback when transparency/compositing is unavailable. */
+body.no-transparency #root > * {
+  background: #141414;
+}
+
+button,
+select,
+input {
+  font-family: inherit;
+  color: var(--text);
+}
+
+.drag {
+  -webkit-app-region: drag;
+}
+
+.no-drag,
+button,
+select,
+input {
+  -webkit-app-region: no-drag;
+}

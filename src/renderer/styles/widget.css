@@ -1,0 +1,231 @@
+/* Floating glass-morphism widget */
+.widget {
+  height: 100%;
+  padding: 10px 12px;
+  background: var(--bg-glass);
+  backdrop-filter: blur(18px);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.widget__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.widget__title {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+}
+
+.widget__section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.widget__section-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.widget__section-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+}
+
+.widget__cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.widget__error {
+  font-size: 10px;
+  color: var(--err);
+  word-break: break-word;
+}
+
+/* Metric card */
+.metric-card {
+  background: var(--bg-card);
+  border-radius: 8px;
+  padding: 6px 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.metric-card__label {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+}
+
+.metric-card__value {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.metric-card__unit {
+  font-size: 10px;
+  font-weight: 400;
+  color: var(--text-dim);
+  margin-left: 2px;
+}
+
+/* Connection badge */
+.badge {
+  font-size: 9px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-dim);
+}
+
+.badge--connected {
+  background: rgba(52, 211, 153, 0.18);
+  color: var(--ok);
+}
+
+.badge--reconnecting,
+.badge--connecting {
+  background: rgba(251, 191, 36, 0.18);
+  color: var(--warn);
+}
+
+.badge--error {
+  background: rgba(248, 113, 113, 0.18);
+  color: var(--err);
+}
+
+/* Profile selector */
+.profile-selector {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.profile-selector select {
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  padding: 2px 6px;
+  font-size: 11px;
+}
+
+.gear-button {
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  cursor: pointer;
+  padding: 2px 6px;
+  font-size: 12px;
+}
+
+.gear-button:hover {
+  border-color: var(--accent);
+}
+
+/* SSH panel */
+.panel {
+  height: 100%;
+  padding: 10px 12px;
+  background: var(--bg-glass);
+  backdrop-filter: blur(18px);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+}
+
+.panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.panel__header h2 {
+  font-size: 13px;
+}
+
+.panel__list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.panel__list-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 11px;
+  gap: 6px;
+}
+
+.panel__list-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.panel__empty {
+  font-size: 11px;
+  color: var(--text-dim);
+}
+
+.panel__form {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.panel__form input {
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 12px;
+}
+
+.panel__form-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.panel button {
+  background: var(--bg-card);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px;
+  padding: 4px 10px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.panel button[type='submit'] {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.panel button:hover {
+  border-color: var(--accent);
+}
+
+.panel__result {
+  font-size: 11px;
+  color: var(--text-dim);
+}
