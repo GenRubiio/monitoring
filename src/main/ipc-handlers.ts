@@ -1,4 +1,4 @@
-import { ipcMain, type BrowserWindow } from 'electron';
+import { app, ipcMain, type BrowserWindow } from 'electron';
 import { CH } from '../shared/channels';
 import type {
   SshProfile,
@@ -157,6 +157,14 @@ export function registerIpcHandlers(win: BrowserWindow): () => void {
     }
   });
 
+  ipcMain.on(CH.WINDOW_MINIMIZE, () => {
+    if (!win.isDestroyed()) win.minimize();
+  });
+
+  ipcMain.on(CH.APP_CLOSE, () => {
+    app.quit();
+  });
+
   return () => {
     stopLocal();
     clearInterval(remoteTimer);
@@ -165,6 +173,8 @@ export function registerIpcHandlers(win: BrowserWindow): () => void {
     ipcMain.removeHandler(CH.PROFILE_DELETE);
     ipcMain.removeHandler(CH.PROFILE_LIST);
     ipcMain.removeAllListeners(CH.PROFILE_SELECT);
+    ipcMain.removeAllListeners(CH.WINDOW_MINIMIZE);
+    ipcMain.removeAllListeners(CH.APP_CLOSE);
   };
 }
 

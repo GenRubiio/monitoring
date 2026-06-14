@@ -46,6 +46,14 @@ const api: MonitorApi = {
   selectProfile(id: string | null): void {
     ipcRenderer.send(CH.PROFILE_SELECT, { id });
   },
+
+  minimizeWindow(): void {
+    ipcRenderer.send(CH.WINDOW_MINIMIZE);
+  },
+
+  closeApp(): void {
+    ipcRenderer.send(CH.APP_CLOSE);
+  },
 };
 
 contextBridge.exposeInMainWorld('api', api);

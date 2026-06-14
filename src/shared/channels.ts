@@ -12,6 +12,8 @@ export const CH = {
   PROFILE_DELETE: 'profile:delete',
   PROFILE_LIST: 'profile:list',
   PROFILE_SELECT: 'profile:select',
+  WINDOW_MINIMIZE: 'window:minimize',
+  APP_CLOSE: 'app:close',
 } as const;
 
 export type ChannelName = (typeof CH)[keyof typeof CH];

@@ -6,6 +6,7 @@ import type {
 } from '../../shared/types';
 import { MetricCard } from './MetricCard';
 import { ProfileSelector } from './ProfileSelector';
+import { WindowControls } from './WindowControls';
 
 interface MetricsWidgetProps {
   local: MetricsSnapshot | null;
@@ -69,7 +70,10 @@ export function MetricsWidget({
     <div className="widget drag">
       <header className="widget__header drag">
         <span className="widget__title">System Monitor</span>
-        <ProfileSelector onOpenPanel={onOpenPanel} />
+        <div className="widget__header-actions no-drag">
+          <ProfileSelector onOpenPanel={onOpenPanel} />
+          <WindowControls />
+        </div>
       </header>
 
       <section className="widget__section">

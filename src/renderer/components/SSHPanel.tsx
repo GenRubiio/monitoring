@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import type { SshProfile, SshProfileInput } from '../../shared/types';
+import { WindowControls } from './WindowControls';
 
 interface SSHPanelProps {
   onClose: () => void;
@@ -97,9 +98,12 @@ export function SSHPanel({ onClose }: SSHPanelProps): React.JSX.Element {
     <div className="panel no-drag">
       <header className="panel__header">
         <h2>SSH Profiles</h2>
-        <button type="button" className="no-drag" onClick={onClose}>
-          Close
-        </button>
+        <div className="panel__header-actions">
+          <button type="button" className="no-drag" onClick={onClose}>
+            Back
+          </button>
+          <WindowControls />
+        </div>
       </header>
 
       <ul className="panel__list">

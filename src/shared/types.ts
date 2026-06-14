@@ -11,7 +11,7 @@ export interface MetricsSnapshot {
   timestamp: number; // Date.now() at collection
   cpuLoadPercent: number; // 0..100, rounded for display in UI
   memTotalBytes: number; // raw bytes from si.mem().total
-  memUsedBytes: number; // raw bytes from si.mem().used
+  memUsedBytes: number; // active RAM, excluding reclaimable cache
   cpuTempC: number | null; // null => render "N/A"
   error: string | null; // non-null when a tick failed; UI shows error badge
 }
@@ -77,4 +77,6 @@ export interface MonitorApi {
 
   // fire-and-forget
   selectProfile(id: string | null): void;
+  minimizeWindow(): void;
+  closeApp(): void;
 }

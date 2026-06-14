@@ -21,7 +21,10 @@ export async function collectLocalSnapshot(): Promise<MetricsSnapshot> {
       timestamp: Date.now(),
       cpuLoadPercent: Math.round(load.currentLoad),
       memTotalBytes: mem.total,
-      memUsedBytes: mem.used,
+      // `used` is total - free and therefore includes reclaimable cache,
+      // especially on macOS. `active` represents RAM currently in use while
+      // excluding that cache, matching what the widget intends to display.
+      memUsedBytes: mem.active,
       cpuTempC:
         typeof temp.main === 'number' && !Number.isNaN(temp.main)
           ? temp.main
