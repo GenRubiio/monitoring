@@ -2,18 +2,27 @@ import type { BrowserWindow } from 'electron';
 import si from 'systeminformation';
 import { CH } from '../shared/channels';
 import type { MetricsSnapshot } from '../shared/types';
+import { readMacCpuTemperature } from './temperature-macos';
 
 const POLL_INTERVAL_MS = 2000;
+
+async function readCpuTemperature(): Promise<number | null> {
+  const temp = await si.cpuTemperature();
+  if (typeof temp.main === 'number' && !Number.isNaN(temp.main)) {
+    return temp.main;
+  }
+  return readMacCpuTemperature();
+}
 
 // Collects one local metrics sample. Always resolves with a MetricsSnapshot;
 // on failure the snapshot carries an `error` string instead of throwing, so a
 // single bad tick never tears down the polling loop or kills the window.
 export async function collectLocalSnapshot(): Promise<MetricsSnapshot> {
   try {
-    const [load, mem, temp] = await Promise.all([
+    const [load, mem, cpuTempC] = await Promise.all([
       si.currentLoad(),
       si.mem(),
-      si.cpuTemperature(),
+      readCpuTemperature(),
     ]);
 
     return {
@@ -25,10 +34,7 @@ export async function collectLocalSnapshot(): Promise<MetricsSnapshot> {
       // especially on macOS. `active` represents RAM currently in use while
       // excluding that cache, matching what the widget intends to display.
       memUsedBytes: mem.active,
-      cpuTempC:
-        typeof temp.main === 'number' && !Number.isNaN(temp.main)
-          ? temp.main
-          : null,
+      cpuTempC,
       error: null,
     };
   } catch (err) {

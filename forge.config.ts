@@ -11,9 +11,7 @@ const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
     appBundleId: 'com.monitoring.electron-system-monitor',
-  },
-  rebuildConfig: {
-    blockList: ['cpu-features'],
+    extraResource: ['resources'],
   },
   makers: [
     new MakerSquirrel({}),
