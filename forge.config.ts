@@ -4,6 +4,7 @@ import { MakerZIP } from '@electron-forge/maker-zip';
 import { MakerDeb } from '@electron-forge/maker-deb';
 import { MakerRpm } from '@electron-forge/maker-rpm';
 import { VitePlugin } from '@electron-forge/plugin-vite';
+import { AutoUnpackNativesPlugin } from '@electron-forge/plugin-auto-unpack-natives';
 import { FusesPlugin } from '@electron-forge/plugin-fuses';
 import { FuseV1Options, FuseVersion } from '@electron/fuses';
 
@@ -12,6 +13,13 @@ const config: ForgeConfig = {
     asar: true,
     appBundleId: 'com.monitoring.electron-system-monitor',
     extraResource: ['resources'],
+    // The Vite plugin normally ignores everything except `.vite`. The main
+    // process intentionally externalizes runtime dependencies, so include
+    // production node_modules as well (Packager prunes devDependencies).
+    ignore: (file) => {
+      if (!file) return false;
+      return !file.startsWith('/.vite') && !file.startsWith('/node_modules');
+    },
   },
   makers: [
     new MakerSquirrel({}),
@@ -43,6 +51,7 @@ const config: ForgeConfig = {
         },
       ],
     }),
+    new AutoUnpackNativesPlugin({}),
     // Fuses are used to enable/disable various Electron functionality
     // at package time, before code signing the application
     new FusesPlugin({

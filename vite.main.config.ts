@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 
-// Main process bundle. Targets Node and externalizes native/CJS deps so they
-// are required at runtime from node_modules rather than bundled.
+// Keep runtime dependencies external. Forge includes them in the packaged
+// app through the custom packager ignore rule in forge.config.ts.
 // https://vitejs.dev/config
 export default defineConfig({
   build: {
