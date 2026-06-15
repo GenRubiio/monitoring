@@ -3,15 +3,25 @@ import type { SshProfile } from '../../shared/types';
 
 interface ProfileSelectorProps {
   onOpenPanel: () => void;
+  activeProfileId?: string | null;
 }
 
 // Active-profile dropdown plus a gear button to open the SSH panel. All
 // controls are no-drag so they remain clickable inside the drag region.
 export function ProfileSelector({
   onOpenPanel,
+  activeProfileId,
 }: ProfileSelectorProps): React.JSX.Element {
   const [profiles, setProfiles] = useState<SshProfile[]>([]);
   const [selectedId, setSelectedId] = useState<string>('');
+
+  // Sync the dropdown selection when main process restores the active profile
+  // (e.g., on startup). Only sync if the user hasn't made a local selection yet.
+  useEffect(() => {
+    if (activeProfileId && selectedId === '') {
+      setSelectedId(activeProfileId);
+    }
+  }, [activeProfileId, selectedId]);
 
   useEffect(() => {
     let cancelled = false;

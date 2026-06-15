@@ -105,19 +105,29 @@ class RemoteMetricsManager {
       if (gen !== this.generation) return;
       this.connectionState = 'connected';
       this.backoffMs = INITIAL_BACKOFF_MS;
+      // eslint-disable-next-line no-console
+      console.log(`[ssh] Connected to ${profile.host}:${profile.port}`);
       // Emit a first sample promptly (satisfies "within 5s of selection").
       void this.collectRemoteTick();
     });
 
+    let failureHandled = false;
     const onFailure = (err?: Error): void => {
       if (gen !== this.generation) return;
+      // The 'error' event is always followed by 'close'. Guard so only the
+      // first call wins — the error message is more descriptive than 'close'.
+      if (failureHandled) return;
+      failureHandled = true;
       this.connectionState = 'reconnecting';
+      const msg = err ? err.message : 'connection closed';
+      // eslint-disable-next-line no-console
+      console.error(`[ssh] Connection to ${profile.host}:${profile.port} failed: ${msg}`);
       this.push({
         cpuLoadPercent: null,
         memTotalBytes: null,
         memUsedBytes: null,
         cpuTempC: null,
-        error: err ? err.message : 'connection closed',
+        error: msg,
       });
       this.scheduleReconnect();
     };

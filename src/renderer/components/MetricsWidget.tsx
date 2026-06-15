@@ -71,7 +71,7 @@ export function MetricsWidget({
       <header className="widget__header drag">
         <span className="widget__title">System Monitor</span>
         <div className="widget__header-actions no-drag">
-          <ProfileSelector onOpenPanel={onOpenPanel} />
+          <ProfileSelector onOpenPanel={onOpenPanel} activeProfileId={remote?.profileId} />
           <WindowControls />
         </div>
       </header>

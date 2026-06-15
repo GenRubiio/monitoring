@@ -1,4 +1,5 @@
 import { app, ipcMain, type BrowserWindow } from 'electron';
+import { createSocket } from 'dgram';
 import { CH } from '../shared/channels';
 import type {
   SshProfile,
@@ -8,6 +9,32 @@ import type {
 import { startLocalMetricsLoop } from './metrics-local';
 import { remoteMetrics, testSshConnection } from './metrics-remote';
 import { ProfileStore, normalizePort } from './profile-store';
+
+// Join the mDNS multicast group so macOS shows the Local Network Privacy
+// dialog for this app. On macOS 15+, direct TCP connections to local IPs do
+// NOT trigger the dialog — only Bonjour/multicast operations do.
+function triggerLocalNetworkPermission(): void {
+  if (process.platform !== 'darwin') return;
+  // First attempt: join the mDNS multicast group (most reliable trigger)
+  const socket = createSocket({ type: 'udp4', reuseAddr: true });
+  const close = (): void => {
+    try { socket.close(); } catch { /* already closed */ }
+  };
+  socket.on('error', close);
+  socket.bind(5353, () => {
+    try {
+      socket.addMembership('224.0.0.251');
+      // Stay long enough for macOS to evaluate the Local Network access request,
+      // then close. The dialog will appear before the SSH attempt (800ms later).
+      setTimeout(close, 2000);
+    } catch {
+      close();
+    }
+  });
+  // Second attempt: DNS lookup of a .local name to trigger mDNS resolution
+  const dns = require('dns') as typeof import('dns');
+  dns.lookup('monitoring.local', () => { /* ignore result */ });
+}
 
 const profileStore = new ProfileStore();
 
@@ -73,8 +100,34 @@ function validateDeletePayload(payload: unknown): { id: string } {
 const POLL_INTERVAL_MS = 2000;
 
 // Registers all IPC handlers and starts the shared metric poll loop.
+// Also restores the previously active SSH profile from persisted store.
 export function registerIpcHandlers(win: BrowserWindow): () => void {
   remoteMetrics.attach(win);
+
+  // Restore the previously active SSH profile after the window is ready.
+  // Deferring until 'ready-to-show' keeps the app in the foreground when macOS
+  // evaluates the Local Network Privacy check, ensuring the dialog appears
+  // instead of silently returning EHOSTUNREACH.
+  const savedActiveId = profileStore.getActiveProfileId();
+  if (savedActiveId) {
+    const profile = profileStore.getById(savedActiveId);
+    if (profile) {
+      // eslint-disable-next-line no-console
+      console.log(`[ipc] Will restore profile: ${profile.name} (${profile.username}@${profile.host}:${profile.port})`);
+      // did-finish-load is more reliable than ready-to-show for transparent
+      // frameless windows: it always fires once the renderer has loaded.
+      win.webContents.once('did-finish-load', () => {
+        // Trigger the mDNS multicast probe so macOS shows the Local Network
+        // Privacy dialog before the SSH connection is attempted.
+        triggerLocalNetworkPermission();
+        setTimeout(() => {
+          // eslint-disable-next-line no-console
+          console.log(`[ipc] Restoring active profile: ${profile.name}`);
+          remoteMetrics.setActiveProfile(profile);
+        }, 800);
+      });
+    }
+  }
 
   // Local metrics push loop (own 2s interval inside metrics-local).
   const stopLocal = startLocalMetricsLoop(win);
