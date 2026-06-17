@@ -54,6 +54,10 @@ export function MetricsWidget({
       ? `${bytesToGb(local.memUsedBytes)} / ${bytesToGb(local.memTotalBytes)}`
       : PLACEHOLDER;
   const localTemp = local ? formatTemp(local.cpuTempC) : PLACEHOLDER;
+  const localDisk =
+    local && local.error === null && local.diskTotalBytes !== null
+      ? `${bytesToGb(local.diskUsedBytes)} / ${bytesToGb(local.diskTotalBytes)}`
+      : PLACEHOLDER;
 
   const remoteState: RemoteConnectionState = remote?.connectionState ?? 'idle';
   const remoteReady = remoteState === 'connected';
@@ -65,6 +69,10 @@ export function MetricsWidget({
       : PLACEHOLDER;
   const remoteTemp =
     remoteReady && remote ? formatTemp(remote.cpuTempC) : PLACEHOLDER;
+  const remoteDisk =
+    remoteReady && remote && remote.diskTotalBytes !== null
+      ? `${bytesToGb(remote.diskUsedBytes)} / ${bytesToGb(remote.diskTotalBytes)}`
+      : PLACEHOLDER;
 
   return (
     <div className="widget drag">
@@ -83,8 +91,9 @@ export function MetricsWidget({
         ) : null}
         <div className="widget__cards">
           <MetricCard label="CPU" value={localCpu} unit="%" />
-          <MetricCard label="RAM" value={localRam} unit="GB" />
           <MetricCard label="Temp" value={localTemp} unit={localTemp === 'N/A' ? '' : '°C'} />
+          <MetricCard label="RAM" value={localRam} unit="GB" />
+          <MetricCard label="Disk" value={localDisk} unit="GB" />
         </div>
       </section>
 
@@ -110,12 +119,13 @@ export function MetricsWidget({
         ) : null}
         <div className="widget__cards">
           <MetricCard label="CPU" value={remoteCpu} unit={remoteCpu === PLACEHOLDER ? '' : '%'} />
-          <MetricCard label="RAM" value={remoteRam} unit={remoteRam === PLACEHOLDER ? '' : 'GB'} />
           <MetricCard
             label="Temp"
             value={remoteTemp}
             unit={remoteTemp === 'N/A' || remoteTemp === PLACEHOLDER ? '' : '°C'}
           />
+          <MetricCard label="RAM" value={remoteRam} unit={remoteRam === PLACEHOLDER ? '' : 'GB'} />
+          <MetricCard label="Disk" value={remoteDisk} unit={remoteDisk === PLACEHOLDER ? '' : 'GB'} />
         </div>
       </section>
     </div>

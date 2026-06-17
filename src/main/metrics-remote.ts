@@ -11,6 +11,7 @@ import {
   parseFreeBytes,
   parseSensorsTemp,
   parseThermalZoneTemp,
+  parseDfBytes,
 } from './parsers';
 
 const INITIAL_BACKOFF_MS = 1000;
@@ -48,6 +49,8 @@ class RemoteMetricsManager {
         memTotalBytes: null,
         memUsedBytes: null,
         cpuTempC: null,
+        diskTotalBytes: null,
+        diskUsedBytes: null,
         error: null,
       });
       return;
@@ -60,6 +63,8 @@ class RemoteMetricsManager {
       memTotalBytes: null,
       memUsedBytes: null,
       cpuTempC: null,
+      diskTotalBytes: null,
+      diskUsedBytes: null,
       error: null,
     });
     this.ensureConnection();
@@ -127,6 +132,8 @@ class RemoteMetricsManager {
         memTotalBytes: null,
         memUsedBytes: null,
         cpuTempC: null,
+        diskTotalBytes: null,
+        diskUsedBytes: null,
         error: msg,
       });
       this.scheduleReconnect();
@@ -187,12 +194,17 @@ class RemoteMetricsManager {
 
       const cpuTempC = await this.collectTemp(client);
 
+      const dfOut = await this.exec(client, 'df -B1 / 2>/dev/null');
+      const { total: diskTotal, used: diskUsed } = parseDfBytes(dfOut);
+
       if (gen !== this.generation) return;
       this.push({
         cpuLoadPercent,
         memTotalBytes: total,
         memUsedBytes: used,
         cpuTempC,
+        diskTotalBytes: diskTotal,
+        diskUsedBytes: diskUsed,
         error: null,
       });
     } catch (err) {
@@ -202,6 +214,8 @@ class RemoteMetricsManager {
         memTotalBytes: null,
         memUsedBytes: null,
         cpuTempC: null,
+        diskTotalBytes: null,
+        diskUsedBytes: null,
         error: err instanceof Error ? err.message : String(err),
       });
     }
@@ -254,6 +268,8 @@ class RemoteMetricsManager {
       | 'memTotalBytes'
       | 'memUsedBytes'
       | 'cpuTempC'
+      | 'diskTotalBytes'
+      | 'diskUsedBytes'
       | 'error'
     >,
   ): void {

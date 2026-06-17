@@ -13,6 +13,8 @@ export interface MetricsSnapshot {
   memTotalBytes: number; // raw bytes from si.mem().total
   memUsedBytes: number; // active RAM, excluding reclaimable cache
   cpuTempC: number | null; // null => render "N/A"
+  diskTotalBytes: number | null;
+  diskUsedBytes: number | null;
   error: string | null; // non-null when a tick failed; UI shows error badge
 }
 
@@ -32,6 +34,8 @@ export interface RemoteMetricsSnapshot {
   memTotalBytes: number | null;
   memUsedBytes: number | null;
   cpuTempC: number | null; // null => "N/A"
+  diskTotalBytes: number | null;
+  diskUsedBytes: number | null;
   error: string | null; // descriptive error string for UI
 }
 

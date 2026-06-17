@@ -1,13 +1,13 @@
 /* Floating glass-morphism widget */
 .widget {
   height: 100%;
-  padding: 10px 12px;
+  padding: 8px 10px;
   background: var(--bg-glass);
   backdrop-filter: blur(18px);
   border-radius: 14px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 5px;
 }
 
 .widget__header {
@@ -18,7 +18,7 @@
 }
 
 .widget__title {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   letter-spacing: 0.04em;
   color: var(--text-dim);
@@ -58,7 +58,7 @@
 .widget__section {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 3px;
 }
 
 .widget__section-head {
@@ -68,7 +68,7 @@
 }
 
 .widget__section-title {
-  font-size: 11px;
+  font-size: 10px;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   color: var(--accent);
@@ -76,8 +76,8 @@
 
 .widget__cards {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 4px;
 }
 
 .widget__error {
@@ -110,10 +110,10 @@
 .metric-card {
   background: var(--bg-card);
   border-radius: 8px;
-  padding: 6px 8px;
+  padding: 5px 7px;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
 }
 
 .metric-card__label {
@@ -124,7 +124,7 @@
 }
 
 .metric-card__value {
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 600;
 }
 

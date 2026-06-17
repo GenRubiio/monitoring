@@ -10,7 +10,7 @@ declare const MAIN_WINDOW_VITE_NAME: string;
 export function createWidgetWindow(): BrowserWindow {
   const win = new BrowserWindow({
     width: 320,
-    height: 240,
+    height: 260,
     frame: false, // no OS title bar/frame
     transparent: true, // enables rounded corners + vibrancy
     alwaysOnTop: true,

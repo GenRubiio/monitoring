@@ -19,11 +19,14 @@ async function readCpuTemperature(): Promise<number | null> {
 // single bad tick never tears down the polling loop or kills the window.
 export async function collectLocalSnapshot(): Promise<MetricsSnapshot> {
   try {
-    const [load, mem, cpuTempC] = await Promise.all([
+    const [load, mem, cpuTempC, fsData] = await Promise.all([
       si.currentLoad(),
       si.mem(),
       readCpuTemperature(),
+      si.fsSize(),
     ]);
+
+    const rootFs = fsData.find((fs) => fs.mount === '/') ?? fsData[0] ?? null;
 
     return {
       source: 'local',
@@ -35,6 +38,8 @@ export async function collectLocalSnapshot(): Promise<MetricsSnapshot> {
       // excluding that cache, matching what the widget intends to display.
       memUsedBytes: mem.active,
       cpuTempC,
+      diskTotalBytes: rootFs?.size ?? null,
+      diskUsedBytes: rootFs?.used ?? null,
       error: null,
     };
   } catch (err) {
@@ -45,6 +50,8 @@ export async function collectLocalSnapshot(): Promise<MetricsSnapshot> {
       memTotalBytes: 0,
       memUsedBytes: 0,
       cpuTempC: null,
+      diskTotalBytes: null,
+      diskUsedBytes: null,
       error: err instanceof Error ? err.message : String(err),
     };
   }

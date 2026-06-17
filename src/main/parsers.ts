@@ -90,3 +90,17 @@ export function parseThermalZoneTemp(output: string): number | null {
   if (Number.isNaN(milli)) return null;
   return Math.round((milli / 1000) * 10) / 10;
 }
+
+// Parse `df -B1 /` output. Returns total and used bytes for the root filesystem.
+export function parseDfBytes(output: string): { total: number; used: number } {
+  const lines = output.split('\n').filter((l) => l.trim());
+  const dataLine = lines.find((l) => !/^Filesystem/i.test(l.trim()));
+  if (!dataLine) return { total: 0, used: 0 };
+  const fields = dataLine.trim().split(/\s+/);
+  const total = Number(fields[1]);
+  const used = Number(fields[2]);
+  return {
+    total: Number.isNaN(total) ? 0 : total,
+    used: Number.isNaN(used) ? 0 : used,
+  };
+}
