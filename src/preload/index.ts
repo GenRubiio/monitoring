@@ -54,6 +54,10 @@ const api: MonitorApi = {
   closeApp(): void {
     ipcRenderer.send(CH.APP_CLOSE);
   },
+
+  openPrivacySettings(): void {
+    ipcRenderer.send(CH.OPEN_PRIVACY_SETTINGS);
+  },
 };
 
 contextBridge.exposeInMainWorld('api', api);

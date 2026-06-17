@@ -79,4 +79,5 @@ export interface MonitorApi {
   selectProfile(id: string | null): void;
   minimizeWindow(): void;
   closeApp(): void;
+  openPrivacySettings(): void;
 }

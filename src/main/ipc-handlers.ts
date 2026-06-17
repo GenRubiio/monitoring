@@ -1,4 +1,4 @@
-import { app, ipcMain, type BrowserWindow } from 'electron';
+import { app, ipcMain, shell, type BrowserWindow } from 'electron';
 import { createSocket } from 'dgram';
 import { CH } from '../shared/channels';
 import type {
@@ -10,28 +10,54 @@ import { startLocalMetricsLoop } from './metrics-local';
 import { remoteMetrics, testSshConnection } from './metrics-remote';
 import { ProfileStore, normalizePort } from './profile-store';
 
-// Join the mDNS multicast group so macOS shows the Local Network Privacy
-// dialog for this app. On macOS 15+, direct TCP connections to local IPs do
-// NOT trigger the dialog — only Bonjour/multicast operations do.
+// Trigger macOS Local Network Privacy dialog so the user can grant access.
+// On macOS 15+, direct TCP connections to local IPs do NOT trigger the dialog
+// — only Bonjour/multicast operations do.
+// IMPORTANT: bind to port 0 (random), NOT 5353. mDNSResponder already owns
+// port 5353 and even with reuseAddr the bind can silently fail, which would
+// prevent addMembership from ever being called and the dialog never appearing.
 function triggerLocalNetworkPermission(): void {
   if (process.platform !== 'darwin') return;
-  // First attempt: join the mDNS multicast group (most reliable trigger)
+
+  // Primary: join the mDNS multicast group AND send a minimal mDNS packet so
+  // macOS can attribute the local-network request to this app bundle.
   const socket = createSocket({ type: 'udp4', reuseAddr: true });
   const close = (): void => {
     try { socket.close(); } catch { /* already closed */ }
   };
   socket.on('error', close);
-  socket.bind(5353, () => {
+  socket.bind(0, () => {   // port 0 = OS picks any available port
     try {
       socket.addMembership('224.0.0.251');
-      // Stay long enough for macOS to evaluate the Local Network access request,
-      // then close. The dialog will appear before the SSH attempt (800ms later).
-      setTimeout(close, 2000);
+      // Sending a packet to the mDNS address reinforces the TCC attribution.
+      const mdnsQuery = Buffer.from([
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x01,
+        0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+      ]);
+      socket.send(mdnsQuery, 0, mdnsQuery.length, 5353, '224.0.0.251');
+      setTimeout(close, 3000);
     } catch {
       close();
     }
   });
-  // Second attempt: DNS lookup of a .local name to trigger mDNS resolution
+
+  // Secondary: UDP broadcast to the local subnet (another local-network signal)
+  const broadcastSocket = createSocket({ type: 'udp4', reuseAddr: true });
+  const closeBroadcast = (): void => {
+    try { broadcastSocket.close(); } catch { /* already closed */ }
+  };
+  broadcastSocket.on('error', closeBroadcast);
+  broadcastSocket.bind(0, () => {
+    try {
+      broadcastSocket.setBroadcast(true);
+      broadcastSocket.send(Buffer.alloc(1), 0, 1, 5353, '255.255.255.255');
+      setTimeout(closeBroadcast, 1000);
+    } catch {
+      closeBroadcast();
+    }
+  });
+
+  // Tertiary: .local DNS lookup (triggers system mDNS resolver)
   const dns = require('dns') as typeof import('dns');
   dns.lookup('monitoring.local', () => { /* ignore result */ });
 }
@@ -120,11 +146,14 @@ export function registerIpcHandlers(win: BrowserWindow): () => void {
         // Trigger the mDNS multicast probe so macOS shows the Local Network
         // Privacy dialog before the SSH connection is attempted.
         triggerLocalNetworkPermission();
+        // 2 s gives macOS time to show the TCC dialog and the user time to
+        // click Allow before the first SSH attempt. Without this gap the first
+        // attempt arrives while the dialog is still pending and gets EHOSTUNREACH.
         setTimeout(() => {
           // eslint-disable-next-line no-console
           console.log(`[ipc] Restoring active profile: ${profile.name}`);
           remoteMetrics.setActiveProfile(profile);
-        }, 800);
+        }, 2000);
       });
     }
   }
@@ -218,6 +247,15 @@ export function registerIpcHandlers(win: BrowserWindow): () => void {
     app.quit();
   });
 
+  // Opens macOS System Settings → Privacy & Security → Local Network directly.
+  // Used by the renderer when EHOSTUNREACH is detected to guide the user to
+  // re-enable the permission without navigating the settings manually.
+  ipcMain.on(CH.OPEN_PRIVACY_SETTINGS, () => {
+    void shell.openExternal(
+      'x-apple.systempreferences:com.apple.preference.security?Privacy_LocalNetwork',
+    );
+  });
+
   return () => {
     stopLocal();
     clearInterval(remoteTimer);
@@ -228,6 +266,7 @@ export function registerIpcHandlers(win: BrowserWindow): () => void {
     ipcMain.removeAllListeners(CH.PROFILE_SELECT);
     ipcMain.removeAllListeners(CH.WINDOW_MINIMIZE);
     ipcMain.removeAllListeners(CH.APP_CLOSE);
+    ipcMain.removeAllListeners(CH.OPEN_PRIVACY_SETTINGS);
   };
 }
 

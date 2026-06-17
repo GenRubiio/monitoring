@@ -96,7 +96,17 @@ export function MetricsWidget({
           </span>
         </div>
         {remote?.error && remoteState === 'reconnecting' ? (
-          <div className="widget__error">{remote.error}</div>
+          <div className="widget__error">
+            {remote.error}
+            {remote.error.includes('EHOSTUNREACH') ? (
+              <button
+                className="widget__fix-btn no-drag"
+                onClick={() => window.api.openPrivacySettings()}
+              >
+                Fix in System Settings →
+              </button>
+            ) : null}
+          </div>
         ) : null}
         <div className="widget__cards">
           <MetricCard label="CPU" value={remoteCpu} unit={remoteCpu === PLACEHOLDER ? '' : '%'} />

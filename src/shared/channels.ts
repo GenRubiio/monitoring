@@ -14,6 +14,7 @@ export const CH = {
   PROFILE_SELECT: 'profile:select',
   WINDOW_MINIMIZE: 'window:minimize',
   APP_CLOSE: 'app:close',
+  OPEN_PRIVACY_SETTINGS: 'app:open-privacy-settings',
 } as const;
 
 export type ChannelName = (typeof CH)[keyof typeof CH];
